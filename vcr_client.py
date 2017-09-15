@@ -47,6 +47,28 @@ def get_request(method='', uri=''):
     }
 
 
+def media_put(media_id):
+    """
+    :param media_id: vod media id
+    :return:
+    """
+    request = get_request('PUT', '/v1/media/{}'.format(media_id))
+    request = generate_signature(request)
+    return requests.put('{}{}'.format(SERVER, request['uri']),
+                        headers=request['headers'])
+
+
+def media_get(media_id):
+    """
+    :param media_id: vod media id
+    :return:
+    """
+    request = get_request('GET', '/v1/media/{}'.format(media_id))
+    request = generate_signature(request)
+    return requests.get('{}{}'.format(SERVER, request['uri']),
+                        headers=request['headers'])
+
+
 def text_put(text):
     """
     :param text:
@@ -63,5 +85,12 @@ def text_put(text):
 
 
 if __name__ == "__main__":
-    response = text_put("这是一段待审核文本")
-    print response.json()
+    response = media_put("YourMediaId")
+    if response.status_code == 200:
+        print "congratulations!"
+    else:
+        print "put media error:", response.json()
+    # wait for media finish notification or 
+    # use media_get to query vcr check result.
+    # response = media_get("YourMediaId")
+    # print response.json()
