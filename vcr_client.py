@@ -47,14 +47,18 @@ def get_request(method='', uri=''):
     }
 
 
-def media_put(media_id):
+def media_put(media_id, notification=None):
     """
     :param media_id: vod media id
+    :param notification: callback notification
     :return:
     """
     request = get_request('PUT', '/v1/media/{}'.format(media_id))
+    if notification is None:
+        notification = ''
+    request['params']['notification'] = notification
     request = generate_signature(request)
-    return requests.put('{}{}'.format(SERVER, request['uri']),
+    return requests.put('{}{}?notification={}'.format(SERVER, request['uri'], notification),
                         headers=request['headers'])
 
 
@@ -90,7 +94,7 @@ if __name__ == "__main__":
         print "congratulations!"
     else:
         print "put media error:", response.json()
-    # wait for media finish notification or 
+    # wait for media check response notification or
     # use media_get to query vcr check result.
     # response = media_get("YourMediaId")
     # print response.json()
