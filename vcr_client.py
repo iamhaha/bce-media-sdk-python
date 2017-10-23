@@ -6,6 +6,7 @@ import json
 import logging
 import requests
 import bcesigner
+import time
 
 
 SERVER = 'http://vcr.bj.baidubce.com'
@@ -73,6 +74,39 @@ def media_get(media_id):
                         headers=request['headers'])
 
 
+def stream_post(stream_url, notification):
+    """
+    :param stream_url: stream url
+    :param notification: notification
+    :return:
+    """
+    request = get_request('POST', '/v1/stream')
+    request = generate_signature(request)
+    payload = {
+        'source': stream_url,
+        'notification': notification
+    }
+    return requests.post('{}{}'.format(SERVER, request['uri']), 
+                        data=json.dumps(payload),
+                        headers=request['headers'])
+
+
+def stream_get(stream_url, start_time, end_time):
+    """
+    :param stream_url: stream url
+    :param start_time: utc time, e.g. 2017-07-24T13:37:10Z
+    :param end_time: utc time
+    :return: stream check result
+    """
+    request = get_request('GET', '/v1/stream')
+    request['params']['source'] = stream_url
+    request['params']['startTime'] = start_time
+    request['params']['endTime'] = end_time
+    request = generate_signature(request)
+    return requests.get('{}{}?source={}&startTime={}&endTime={}'.format(SERVER, 
+        request['uri'], stream_url, start_time, end_time), headers=request['headers'])
+
+
 def text_put(text):
     """
     :param text:
@@ -89,12 +123,32 @@ def text_put(text):
 
 
 if __name__ == "__main__":
+    # ---- check media ----
     response = media_put("YourMediaId")
     if response.status_code == 200:
         print "congratulations!"
     else:
         print "put media error:", response.json()
+
     # wait for media check response notification or
     # use media_get to query vcr check result.
     # response = media_get("YourMediaId")
     # print response.json()
+
+    # ---- check stream ----
+    # stream_url = "YourStreamUrl"
+    # response = stream_post(stream_url, "YourNotificationName")
+    # if response.status_code == 200:
+    #     print "congratulations!"
+    # else:
+    #     print "put stream error:", response.json()
+    
+    # wait for stream check notification or
+    # use stream_get to query stream check result
+    # while True:
+    #     response = stream_get(stream_url, '2017-10-23T00:00:00Z', '2017-10-23T16:00:00Z')
+    #     if response.status_code == 200:
+    #         print "stream check result:", response.json()
+    #     else:
+    #         print "get stream check result error:", response.json()
+    #     time.sleep(5)
