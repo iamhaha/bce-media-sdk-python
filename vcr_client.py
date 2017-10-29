@@ -74,6 +74,30 @@ def media_get(media_id):
                         headers=request['headers'])
 
 
+def media_speech(media_id):
+    """
+    :param media_id:
+    :return:
+    """
+    request = get_request('GET', '/v1/media/{}'.format(media_id))
+    request['params']['speech'] = ''
+    request = generate_signature(request)
+    return requests.get('{}{}'.format(SERVER, request['uri']),
+                        headers=request['headers'])
+
+
+def media_character(media_id):
+    """
+    :param media_id:
+    :return:
+    """
+    request = get_request('GET', '/v1/media/{}'.format(media_id))
+    request['params']['character'] = ''
+    request = generate_signature(request)
+    return requests.get('{}{}'.format(SERVER, request['uri']),
+                        headers=request['headers'])
+
+
 def stream_post(stream_url, notification):
     """
     :param stream_url: stream url
@@ -105,6 +129,21 @@ def stream_get(stream_url, start_time, end_time):
     request = generate_signature(request)
     return requests.get('{}{}?source={}&startTime={}&endTime={}'.format(SERVER, 
         request['uri'], stream_url, start_time, end_time), headers=request['headers'])
+
+
+def image_put(source):
+    """
+    :param source:
+    :return:
+    """
+    request = get_request('PUT', '/v1/image')
+    request = generate_signature(request)
+    payload = {
+        'source': source
+    }
+    return requests.put('{}{}'.format(SERVER, request['uri']),
+                        data=json.dumps(payload),
+                        headers=request['headers'])
 
 
 def text_put(text):
@@ -152,3 +191,14 @@ if __name__ == "__main__":
     #     else:
     #         print "get stream check result error:", response.json()
     #     time.sleep(5)
+
+    # ---- check image ----
+    # source format: bos://{bucket}/{object} or url
+    # image_source = "YourImageSource" 
+    # response = image_put(image_source)
+    # print response.json()
+
+    # ---- check text ----
+    # text = "YourText"
+    # response = text_put(image_source)
+    # print response.json()
