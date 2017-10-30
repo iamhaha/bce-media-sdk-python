@@ -82,7 +82,7 @@ def media_speech(media_id):
     request = get_request('GET', '/v1/media/{}'.format(media_id))
     request['params']['speech'] = ''
     request = generate_signature(request)
-    return requests.get('{}{}'.format(SERVER, request['uri']),
+    return requests.get('{}{}?speech'.format(SERVER, request['uri']),
                         headers=request['headers'])
 
 
@@ -94,7 +94,7 @@ def media_character(media_id):
     request = get_request('GET', '/v1/media/{}'.format(media_id))
     request['params']['character'] = ''
     request = generate_signature(request)
-    return requests.get('{}{}'.format(SERVER, request['uri']),
+    return requests.get('{}{}?character'.format(SERVER, request['uri']),
                         headers=request['headers'])
 
 
