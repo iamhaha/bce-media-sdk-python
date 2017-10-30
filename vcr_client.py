@@ -8,7 +8,6 @@ import requests
 import bcesigner
 import time
 
-
 SERVER = 'http://vcr.bj.baidubce.com'
 HOST = 'vcr.bj.baidubce.com'
 ACCESS_KEY = 'YourAK'
@@ -48,18 +47,23 @@ def get_request(method='', uri=''):
     }
 
 
-def media_put(media_id, notification=None):
+def media_put(media_id, preset=None, notification=None):
     """
     :param media_id: vod media id
+    :param preset: vcr check preset
     :param notification: callback notification
     :return:
     """
     request = get_request('PUT', '/v1/media/{}'.format(media_id))
+    if preset is None:
+        preset = ''
     if notification is None:
         notification = ''
+    request['params']['preset'] = preset
     request['params']['notification'] = notification
     request = generate_signature(request)
-    return requests.put('{}{}?notification={}'.format(SERVER, request['uri'], notification),
+    return requests.put('{}{}?preset={}&notification={}'
+                        .format(SERVER, request['uri'], preset, notification),
                         headers=request['headers'])
 
 
@@ -110,9 +114,9 @@ def stream_post(stream_url, notification):
         'source': stream_url,
         'notification': notification
     }
-    return requests.post('{}{}'.format(SERVER, request['uri']), 
-                        data=json.dumps(payload),
-                        headers=request['headers'])
+    return requests.post('{}{}'.format(SERVER, request['uri']),
+                         data=json.dumps(payload),
+                         headers=request['headers'])
 
 
 def stream_get(stream_url, start_time, end_time):
@@ -127,8 +131,9 @@ def stream_get(stream_url, start_time, end_time):
     request['params']['startTime'] = start_time
     request['params']['endTime'] = end_time
     request = generate_signature(request)
-    return requests.get('{}{}?source={}&startTime={}&endTime={}'.format(SERVER, 
-        request['uri'], stream_url, start_time, end_time), headers=request['headers'])
+    return requests.get('{}{}?source={}&startTime={}&endTime={}'
+                        .format(SERVER, request['uri'], stream_url, start_time, end_time),
+                        headers=request['headers'])
 
 
 def image_put(source):
@@ -164,10 +169,14 @@ def text_put(text):
 if __name__ == "__main__":
     # ---- check media ----
     response = media_put("YourMediaId")
+    # response = media_put("YourMediaId", "YourPreset")
+    # response = media_put("YourMediaId", "YourPreset", "YourNotification")
     if response.status_code == 200:
         print "congratulations!"
     else:
         print "put media error:", response.json()
+
+    pass
 
     # wait for media check response notification or
     # use media_get to query vcr check result.
@@ -181,7 +190,7 @@ if __name__ == "__main__":
     #     print "congratulations!"
     # else:
     #     print "put stream error:", response.json()
-    
+
     # wait for stream check notification or
     # use stream_get to query stream check result
     # while True:
@@ -194,7 +203,7 @@ if __name__ == "__main__":
 
     # ---- check image ----
     # source format: bos://{bucket}/{object} or url
-    # image_source = "YourImageSource" 
+    # image_source = "YourImageSource"
     # response = image_put(image_source)
     # print response.json()
 
