@@ -102,6 +102,56 @@ def media_character(media_id):
                         headers=request['headers'])
 
 
+def vodpro_media_put(bucket, path, preset=None, notification=None):
+    """
+    :param bucket:
+    :param path:
+    :return:
+    """
+    request = get_request('PUT', '/v2/media')
+
+    payload = {
+        'source': 'vodpro://' + bucket + '/' + path
+    }
+    if preset is not None:
+        payload['preset'] = preset
+    if notification is not None:
+        payload['notification'] = notification
+    request = generate_signature(request)
+    return requests.put('{}{}'.format(SERVER, request['uri']),
+                        data=json.dumps(payload),
+                        headers=request['headers'])
+
+
+def vodpro_media_get(bucket, path):
+    """
+    :param bucket:
+    :param path:
+    :return:
+    """
+    request = get_request('GET', '/v2/media')
+    source = 'vodpro://' + bucket + '/' + path
+    request['params']['source'] = source
+    request = generate_signature(request)
+    return requests.get('{}{}?source={}'.format(SERVER, request['uri'], source),
+                        headers=request['headers'])
+
+
+def vodpro_media_character(bucket, path):
+    """
+    :param bucket:
+    :param path:
+    :return:
+    """
+    request = get_request('GET', '/v2/media')
+    source = 'vodpro://' + bucket + '/' + path
+    request['params']['source'] = source
+    request['params']['character'] = ''
+    request = generate_signature(request)
+    return requests.get('{}{}?source={}&character'.format(SERVER, request['uri'], source),
+                        headers=request['headers'])
+
+
 def stream_post(stream_url, notification):
     """
     :param stream_url: stream url
@@ -167,10 +217,9 @@ def text_put(text):
 
 
 if __name__ == "__main__":
-    # ---- check media ----
+    # ---- check vod media ----
     response = media_put("YourMediaId")
-    # response = media_put("YourMediaId", "YourPreset")
-    # response = media_put("YourMediaId", "YourPreset", "YourNotification")
+    # response = media_put("YourMediaId", preset="YourPreset", notification="YourNotification")
     if response.status_code == 200:
         print "congratulations!"
     else:
@@ -181,6 +230,24 @@ if __name__ == "__main__":
     # wait for media check response notification or
     # use media_get to query vcr check result.
     # response = media_get("YourMediaId")
+    # print response.json()
+
+    # -- check vodpro media --
+    # response = vodpro_media_put("mc-qylfkujvlst2pgcak", "vcr/test/porn/sexy.mp4")
+    # response = vodpro_media_put("YourBucket", "YourPath", preset="YourPreset",
+    #                             notification="YourNotification")
+    # if response.status_code == 200:
+    #     print "congratulations!"
+    # else:
+    #     print "put media error:", response.json()
+
+    # wait for media check response notification or
+    # use vodpro_media_get to query vcr check result.
+    # response = vodpro_media_get("mc-qylfkujvlst2pgcak", "vcr/test/porn/sexy.mp4")
+    # print response.json()
+
+    # when media is FINISHED, can get character
+    # response = vodpro_media_character("mc-qylfkujvlst2pgcak", "vcr/test/porn/sexy.mp4")
     # print response.json()
 
     # ---- check stream ----
